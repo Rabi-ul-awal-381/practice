@@ -39,10 +39,16 @@ Route::middleware('auth')->group(function () {
     
 });
 
+Route::middleware('auth')->group(function () {
+    // User video routes
+    Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
+    Route::get('/videos/create', [VideoController::class, 'create'])->name('videos.create');
+    Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');
+    Route::get('/videos/{video}', [VideoController::class, 'show'])->name('videos.show');
+});
+
+// Admin routes
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('videos', AdminVideoController::class);
-});
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('videos', VideoController::class);
 });

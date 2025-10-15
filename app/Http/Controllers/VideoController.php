@@ -8,7 +8,8 @@ use App\Models\VideoView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\VideoController as AdminVideoController;
-
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 
 class VideoController extends Controller
@@ -31,6 +32,80 @@ class VideoController extends Controller
 
         return view('videos.index', compact('videos', 'categories', 'selectedCategory'));
     }
+
+    public function create()
+{
+    // Return a form view for uploading a video
+    return view('videos.create');
+}
+
+public function store(Request $request)
+{
+    // Validate input
+    $request->validate([
+        'video_file' => 'nullable|mimes:mp4,mov,avi,wmv|max:20000',
+        'video_url' => 'nullable|url',
+        'title' => 'nullable|string|max:255',
+        'description' => 'nullable|string|max:1000',
+    ]);
+
+    // Ensure at least one source
+    if (!$request->video_file && !$request->video_url) {
+        return back()->withErrors(['video_file' => 'Please upload a video or provide a video link.']);
+    }
+
+    $videoData = [
+        'user_id' => auth()->id(),
+        'title' => $request->title,
+        'description' => $request->description,
+        'video_path' => null,
+        'video_url' => $request->video_url ?? '', // ensure not null
+        'access_level' => 'free',
+    ];
+
+    // Handle local file upload
+    if ($request->hasFile('video_file')) {
+        $path = $request->file('video_file')->store('videos', 'public');
+        $videoData['video_path'] = $path;
+        $videoData['video_url'] = ''; // empty string if uploading local file
+    }
+
+    // If title is empty, try to fetch from link
+    if (empty($videoData['title']) && !empty($videoData['video_url'])) {
+        $link = $videoData['video_url'];
+
+        // Auto-fetch for YouTube
+        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $link, $matches)) {
+            $videoId = $matches[1];
+            try {
+                $response = Http::get("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={$videoId}&format=json");
+                if ($response->successful()) {
+                    $json = $response->json();
+                    $videoData['title'] = $json['title'] ?? null;
+                    $videoData['description'] = $json['author_name'] ? 'Video by '.$json['author_name'] : null;
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
+    }
+
+    // FINAL fallback
+    if (empty($videoData['title'])) {
+        $videoData['title'] = 'Untitled Video';
+    }
+    if (empty($videoData['description'])) {
+        $videoData['description'] = 'No description provided.';
+    }
+
+    // CREATE VIDEO
+    \App\Models\Video::create($videoData);
+
+    return redirect()->route('videos.index')->with('success', 'Video uploaded successfully!');
+}
+
+
+
 
     public function show(Video $video)
     {
