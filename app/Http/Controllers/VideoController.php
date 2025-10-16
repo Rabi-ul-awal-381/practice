@@ -50,7 +50,7 @@ public function store(Request $request)
     ]);
 
     // Ensure at least one source
-    if (!$request->video_file && !$request->video_url) {
+    if (!$request->hasFile('video_file') && !$request->filled('video_url')) {
         return back()->withErrors(['video_file' => 'Please upload a video or provide a video link.']);
     }
 
@@ -59,43 +59,65 @@ public function store(Request $request)
         'title' => $request->title,
         'description' => $request->description,
         'video_path' => null,
-        'video_url' => $request->video_url ?? '', // ensure not null
+        'video_url' => $request->video_url ?? '',
         'access_level' => 'free',
+        'category_id' => null,
+        'views' => 0,
     ];
 
     // Handle local file upload
     if ($request->hasFile('video_file')) {
         $path = $request->file('video_file')->store('videos', 'public');
         $videoData['video_path'] = $path;
-        $videoData['video_url'] = ''; // empty string if uploading local file
+        $videoData['video_url'] = '';
     }
 
-    // If title is empty, try to fetch from link
+    // If title is empty and we have a YouTube URL, fetch the info
     if (empty($videoData['title']) && !empty($videoData['video_url'])) {
         $link = $videoData['video_url'];
 
         // Auto-fetch for YouTube
         if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $link, $matches)) {
             $videoId = $matches[1];
+            
             try {
-                $response = Http::get("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={$videoId}&format=json");
+                $response = Http::timeout(5)->get("https://www.youtube.com/oembed", [
+                    'url' => "https://www.youtube.com/watch?v={$videoId}",
+                    'format' => 'json'
+                ]);
+                
                 if ($response->successful()) {
                     $json = $response->json();
-                    $videoData['title'] = $json['title'] ?? null;
-                    $videoData['description'] = $json['author_name'] ? 'Video by '.$json['author_name'] : null;
+                    
+                    if (empty($videoData['title']) && isset($json['title'])) {
+                        $videoData['title'] = $json['title'];
+                    }
+                    
+                    if (empty($videoData['description']) && isset($json['author_name'])) {
+                        $videoData['description'] = 'Video by ' . $json['author_name'];
+                    }
+                    
+                    \Log::info('YouTube info fetched successfully', ['title' => $json['title'] ?? 'N/A']);
                 }
             } catch (\Exception $e) {
-                // ignore
+                \Log::error('YouTube fetch failed: ' . $e->getMessage());
             }
         }
     }
 
-    // FINAL fallback
+    // FINAL fallback for title and description
     if (empty($videoData['title'])) {
         $videoData['title'] = 'Untitled Video';
     }
+    
     if (empty($videoData['description'])) {
         $videoData['description'] = 'No description provided.';
+    }
+
+    // Set default category if exists
+    $defaultCategory = \App\Models\Category::first();
+    if ($defaultCategory) {
+        $videoData['category_id'] = $defaultCategory->id;
     }
 
     // CREATE VIDEO
@@ -103,7 +125,6 @@ public function store(Request $request)
 
     return redirect()->route('videos.index')->with('success', 'Video uploaded successfully!');
 }
-
 
 
 
