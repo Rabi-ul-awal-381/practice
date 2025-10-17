@@ -5,22 +5,25 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Video;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\Category;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
         $stats = [
             'total_videos' => Video::count(),
-            'total_users' => User::count(),
+            'total_users' => User::where('role', 'user')->count(),
             'paid_members' => User::where('membership_type', 'paid')->count(),
-            'free_members' => User::where('membership_type', 'free')->count(),
+            'total_categories' => Category::count(),
         ];
 
         $recent_videos = Video::with('category')->latest()->take(5)->get();
-        $recent_users = User::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'recent_videos', 'recent_users'));
+        return view('admin.dashboard', compact('stats', 'recent_videos'));
     }
 }

@@ -9,21 +9,21 @@
         <p class="text-gray-600">Explore our collection of authentic Islamic content</p>
     </div>
 
-    <!-- Category Filter -->
-    <div class="mb-8">
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ route('videos.index') }}" 
-               class="px-4 py-2 rounded-lg font-medium transition {{ !$selectedCategory ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                All Videos
-            </a>
-            @foreach($categories as $category)
-                <a href="{{ route('videos.index', ['category' => $category->id]) }}" 
-                   class="px-4 py-2 rounded-lg font-medium transition {{ $selectedCategory == $category->id ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                    {{ $category->name }} ({{ $category->videos_count }})
-                </a>
-            @endforeach
-        </div>
-    </div>
+    <form method="GET" action="{{ route('videos.index') }}" class="flex gap-2 mb-6">
+  <input type="text" name="search" placeholder="Search videos..." value="{{ request('search') }}" class="border rounded px-3 py-2 flex-1">
+  <select name="category" class="border rounded px-3 py-2">
+    <option value="">All Categories</option>
+    @foreach($categories as $cat)
+      <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
+        {{ $cat->name }}
+      </option>
+    @endforeach
+  </select>
+  <button class="bg-blue-600 text-white px-4 py-2 rounded">Filter</button>
+</form>
+
+
+
 
     <!-- Videos Grid -->
     @if($videos->count() > 0)
