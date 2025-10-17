@@ -44,6 +44,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
     Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');
     Route::get('/videos/{video}', [VideoController::class, 'show'])->name('videos.show');
+    Route::get('/upgrade', function () {
+        return view('upgrade');
+    })->middleware('auth')->name('upgrade');
+    
 });
 
 // 🧠 Admin routes (protected by auth + is_admin middleware)

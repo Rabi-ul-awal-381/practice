@@ -3,28 +3,40 @@
 @section('title', 'Welcome - Learn Islam')
 
 @section('content')
-<div class="relative overflow-hidden">
-    <!-- Hero Section -->
-    <div class="bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-            <div class="text-center">
-                <h1 class="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
-                    Learn Islam Online
-                </h1>
-                <p class="text-xl md:text-2xl mb-8 text-green-100 max-w-3xl mx-auto">
-                    Access authentic Islamic knowledge through high-quality videos on Quran recitation, Hadith, and Islamic teachings
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register') }}" class="bg-white text-green-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                        Get Started Free
-                    </a>
-                    <a href="{{ route('login') }}" class="bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-green-800 transition-all duration-300 border-2 border-white">
-                        Login
-                    </a>
-                </div>
+<section class="relative bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white py-20 text-center">
+    <div class="container mx-auto px-6">
+        @auth
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                Welcome back, {{ auth()->user()->name }} 👋
+            </h1>
+            <p class="text-lg text-gray-600 mb-6">
+                Ready to keep learning? Explore our latest videos below.
+            </p>
+            <a href="{{ route('videos.index') }}"
+               class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-indigo-700 transition">
+               🎥 View All Videos
+            </a>
+        @else
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                Welcome to Our Learning Platform 🌙
+            </h1>
+            <p class="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
+                Watch inspiring Quranic content, learn new lessons, and grow your understanding.
+            </p>
+            <div class="space-x-4">
+                <a href="{{ route('login') }}" 
+                   class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-indigo-700 transition">
+                    Login
+                </a>
+                <a href="{{ route('register') }}" 
+                   class="inline-block bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold shadow hover:bg-gray-300 transition">
+                    Register
+                </a>
             </div>
-        </div>
+        @endauth
     </div>
+</section>
+
 
     <!-- Features Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -68,86 +80,70 @@
     </div>
 
     <!-- Membership Plans -->
-    <div class="bg-gray-100 py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-4xl font-bold text-center text-gray-800 mb-4">Choose Your Plan</h2>
-            <p class="text-center text-gray-600 mb-12">Start your Islamic learning journey today</p>
-            
+    <section class="relative py-20 bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700  text-white">
+    <div class="container mx-auto px-6 text-center">
+
+        @guest
+            <!-- Guests see Choose Your Plan -->
+            <h2 class="text-4xl font-bold mb-4">Choose Your Plan</h2>
+            <p class="text-lg mb-10 text-indigo-100 max-w-2xl mx-auto">
+                Start learning for free or unlock premium content to deepen your understanding.
+            </p>
+
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <!-- Free Plan -->
-                <div class="card p-8">
-                    <div class="text-center mb-6">
-                        <span class="bg-gray-200 text-gray-700 px-4 py-1 rounded-full text-sm font-bold">FREE</span>
-                        <h3 class="text-3xl font-bold text-gray-800 mt-4">Free Membership</h3>
-                        <p class="text-gray-600 mt-2">Perfect for getting started</p>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center text-gray-700">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            Access to free videos
-                        </li>
-                        <li class="flex items-center text-gray-700">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            Basic Islamic content
-                        </li>
-                        <li class="flex items-center text-gray-700">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            Community support
-                        </li>
+                <div class="bg-white/10 backdrop-blur rounded-2xl shadow-lg p-8 hover:bg-white/20 transition">
+                    <h3 class="text-2xl font-semibold mb-4">Free Plan</h3>
+                    <ul class="text-indigo-100 text-left mb-6 space-y-2">
+                        <li>✅ Access to selected free videos</li>
+                        <li>✅ No credit card required</li>
+                        <li>❌ No premium lessons</li>
                     </ul>
-                    <a href="{{ route('register') }}" class="btn-secondary w-full text-center block">
-                        Start Free
+                    <a href="{{ route('register') }}"
+                       class="inline-block bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg hover:bg-indigo-100 transition">
+                       Get Started
                     </a>
                 </div>
 
-                <!-- Premium Plan -->
-                <div class="card p-8 border-4 border-yellow-400 relative">
-                    <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 px-4 py-1 rounded-bl-lg font-bold text-sm">
-                        POPULAR
-                    </div>
-                    <div class="text-center mb-6">
-                        <span class="bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 px-4 py-1 rounded-full text-sm font-bold">PREMIUM</span>
-                        <h3 class="text-3xl font-bold text-gray-800 mt-4">Premium Membership</h3>
-                        <p class="text-gray-600 mt-2">Full access to all content</p>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center text-gray-700">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <strong>All free content included</strong>
-                        </li>
-                        <li class="flex items-center text-gray-700">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            Access to premium videos
-                        </li>
-                        <li class="flex items-center text-gray-700">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            Exclusive Islamic lectures
-                        </li>
-                        <li class="flex items-center text-gray-700">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            Priority support
-                        </li>
+                <div class="bg-white/10 backdrop-blur rounded-2xl shadow-lg p-8 hover:bg-white/20 transition">
+                    <h3 class="text-2xl font-semibold mb-4">Premium Plan</h3>
+                    <ul class="text-indigo-100 text-left mb-6 space-y-2">
+                        <li>✅ Unlimited access to all videos</li>
+                        <li>✅ Exclusive premium categories</li>
+                        <li>✅ Watch without ads</li>
                     </ul>
-                    <a href="{{ route('register') }}" class="btn-primary w-full text-center block">
-                        Get Premium
+                    <a href="{{ route('register') }}"
+                       class="inline-block bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg hover:bg-indigo-100 transition">
+                       Upgrade Now
                     </a>
                 </div>
             </div>
-        </div>
+
+        @else
+            <!-- Logged-in users see About / Welcome message -->
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-4xl font-extrabold mb-4">
+                     {{ auth()->user()->name }} 🌙
+                </h2>
+                <p class="text-lg text-indigo-100 leading-relaxed mb-6">
+                    You’re part of a growing community dedicated to learning, reflection, and understanding.  
+                    Explore videos crafted to bring the Qur’an and Islamic knowledge closer to your heart.
+                </p>
+                <p class="text-indigo-100 mb-10">
+                    Continue your journey of knowledge — may every lesson guide you toward light and wisdom.
+                </p>
+
+                <a href="{{ route('videos.index') }}"
+                   class="inline-block bg-white text-indigo-700 px-8 py-3 rounded-lg font-semibold hover:bg-indigo-100 transition shadow">
+                   🎥 Explore All Videos
+                </a>
+            </div>
+        @endguest
+
     </div>
-</div>
+
+    <!-- Decorative gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/20 pointer-events-none"></div>
+</section>
+
+
 @endsection
