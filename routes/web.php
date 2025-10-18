@@ -33,13 +33,19 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::middleware('auth')->group(function () {
     // User dashboard
     Route::get('/dashboard', function () {
+        // Refresh the logged-in user's data from the database
+        $user = \App\Models\User::find(auth()->id());
+        auth()->setUser($user); // update session copy
+    
         $videos = \App\Models\Video::with('category')
-            ->when(!auth()->user()->isPaidMember(), fn($q) => $q->where('access_level', 'free'))
+            ->when(!$user->isPaidMember(), fn($q) => $q->where('access_level', 'free'))
             ->latest()
             ->take(6)
             ->get();
+    
         return view('dashboard', compact('videos'));
     })->name('dashboard');
+    
 
     // User video routes
     Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
