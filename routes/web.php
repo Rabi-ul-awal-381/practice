@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\Admin\DashboardController ;
 use App\Http\Controllers\Admin\VideoController as AdminVideoController;
+use App\Http\Controllers\Paymentcontroller;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,9 +45,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
     Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');
     Route::get('/videos/{video}', [VideoController::class, 'show'])->name('videos.show');
-    Route::get('/upgrade', function () {
-        return view('upgrade');
-    })->middleware('auth')->name('upgrade');
     
 });
 
@@ -59,6 +57,13 @@ Route::middleware(['auth', 'is_admin'])
         Route::resource('videos', AdminVideoController::class);
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
+    });
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/upgrade', [PaymentController::class, 'showPage'])->name('payment.checkout');
+        Route::post('/create-checkout-session', [PaymentController::class, 'createSession'])->name('payment.session');
+        Route::get('/payment-success', [PaymentController::class, 'success'])->name('payment.success');
+        Route::get('/payment-cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
     });
 
 // ✅ Optional API helper (for fetching YouTube info)

@@ -37,7 +37,7 @@ class User extends Authenticatable
 
     public function isPaidMember(): bool
     {
-        return $this->membership_type === 'paid';
+        return $this->membership_type === 'premium';
     }
 
     public function videoViews()
