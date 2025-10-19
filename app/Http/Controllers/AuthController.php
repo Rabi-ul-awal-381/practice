@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -16,26 +17,39 @@ class AuthController extends Controller
     }
 
     public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::min(8)],
-            'membership_type' => ['required', 'in:free,paid'],
-        ]);
+{
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+        'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)],
+        'membership_type' => ['required', 'in:free,paid'],
+    ]);
 
-        $user = User::create([
+    if ($validated['membership_type'] === 'free') {
+        // Create user right away for free plan
+        $user = \App\Models\User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'membership_type' => $validated['membership_type'],
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'membership_type' => 'free',
             'role' => 'user',
         ]);
 
-        Auth::login($user);
-
+        \Illuminate\Support\Facades\Auth::login($user);
         return redirect()->route('dashboard')->with('success', 'Account created successfully!');
     }
+
+    // For paid membership → go to checkout
+    $request->session()->put('pending_user', [
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => $validated['password'], // store plain temporarily
+        'membership_type' => 'paid',
+    ]);
+
+    return redirect()->route('payments.checkout');
+}
+
 
     public function showLogin()
     {

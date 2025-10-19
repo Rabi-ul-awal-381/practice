@@ -10,7 +10,7 @@
             Get access to <span class="font-semibold">exclusive videos</span>, lectures, and Quran recitations.
         </p>
 
-        <form action="{{ route('payment.session') }}" method="POST">
+        <form action="{{ route('payments.session') }}" method="POST">
             @csrf
             <button 
                 type="submit"

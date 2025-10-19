@@ -46,41 +46,46 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    @auth
-                        @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
-                                Admin Panel
-                            </a>
-                        @endif
-                        <a href="{{ route('videos.index') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
-                            Videos
-                        </a>
-                        <a href="{{ route('dashboard') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
-                            Dashboard
-                        </a>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-white text-sm">{{ auth()->user()->name }}</span>
-                            @if(auth()->user()->isPaidMember())
-                                <span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">PREMIUM</span>
-                            @else
-                                <span class="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-xs font-bold">FREE</span>
-                            @endif
-                            <form action="{{ route('logout') }}" method="POST">
-                                @csrf
-                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                                    Logout
-                                </button>
-                            </form>
-                        </div>
-                    @else
-                        <a href="{{ route('login') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
-                            Login
-                        </a>
-                        <a href="{{ route('register') }}" class="bg-white text-green-700 hover:bg-green-50 px-4 py-2 rounded-lg text-sm font-medium transition">
-                            Register
-                        </a>
-                    @endauth
-                </div>
+    <!-- ✅ Videos link always visible -->
+    <a href="{{ route('videos.index') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
+        Videos
+    </a>
+
+    @auth
+        @if(auth()->user()->isAdmin())
+            <a href="{{ route('admin.dashboard') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
+                Admin Panel
+            </a>
+        @endif
+
+        <a href="{{ route('dashboard') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
+            Dashboard
+        </a>
+
+        <div class="flex items-center space-x-3">
+            <span class="text-white text-sm">{{ auth()->user()->name }}</span>
+            @if(auth()->user()->isPaidMember())
+                <span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">PREMIUM</span>
+            @else
+                <span class="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-xs font-bold">FREE</span>
+            @endif
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                    Logout
+                </button>
+            </form>
+        </div>
+    @else
+        <a href="{{ route('login') }}" class="text-white hover:text-green-200 px-3 py-2 rounded-md text-sm font-medium transition">
+            Login
+        </a>
+        <a href="{{ route('register') }}" class="bg-white text-green-700 hover:bg-green-50 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Register
+        </a>
+    @endauth
+</div>
+
             </div>
         </div>
     </nav>

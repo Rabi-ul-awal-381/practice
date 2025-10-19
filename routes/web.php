@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
-use App\Http\Controllers\Admin\DashboardController ;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\VideoController as AdminVideoController;
-use App\Http\Controllers\Paymentcontroller;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,32 +29,43 @@ Route::middleware('guest')->group(function () {
 // 🚪 Logout
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-// 👥 User routes (authenticated)
+
+// 🎥 Videos — accessible to everyone (guests + logged-in users)
+Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
+Route::get('/videos/{video}', [VideoController::class, 'show'])->name('videos.show');
+
+
+// 👥 User routes (authenticated only)
 Route::middleware('auth')->group(function () {
     // User dashboard
     Route::get('/dashboard', function () {
-        // Refresh the logged-in user's data from the database
         $user = \App\Models\User::find(auth()->id());
-        auth()->setUser($user); // update session copy
-    
+        auth()->setUser($user);
+
         $videos = \App\Models\Video::with('category')
             ->when(!$user->isPaidMember(), fn($q) => $q->where('access_level', 'free'))
             ->latest()
             ->take(6)
             ->get();
-    
+
         return view('dashboard', compact('videos'));
     })->name('dashboard');
-    
 
-    // User video routes
-    Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
+    // Video upload (only for logged-in users)
     Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');
-    Route::get('/videos/{video}', [VideoController::class, 'show'])->name('videos.show');
-    
 });
 
-// 🧠 Admin routes (protected by auth + is_admin middleware)
+
+
+// 💳 Payment routes (open for both logged-in and pending users)
+Route::get('/upgrade', [PaymentController::class, 'showPage'])->name('payments.checkout');
+Route::post('/create-checkout-session', [PaymentController::class, 'createSession'])->name('payments.session');
+Route::get('/payment-success', [PaymentController::class, 'success'])->name('payments.success');
+Route::get('/payment-cancel', [PaymentController::class, 'cancel'])->name('payments.cancel');
+
+
+
+// 🧠 Admin routes
 Route::middleware(['auth', 'is_admin'])
     ->prefix('admin')
     ->name('admin.')
@@ -62,17 +73,10 @@ Route::middleware(['auth', 'is_admin'])
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('videos', AdminVideoController::class);
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
-
     });
 
-    Route::middleware('auth')->group(function () {
-        Route::get('/upgrade', [PaymentController::class, 'showPage'])->name('payment.checkout');
-        Route::post('/create-checkout-session', [PaymentController::class, 'createSession'])->name('payment.session');
-        Route::get('/payment-success', [PaymentController::class, 'success'])->name('payment.success');
-        Route::get('/payment-cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
-    });
 
-// ✅ Optional API helper (for fetching YouTube info)
+// ✅ Optional API helper
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 

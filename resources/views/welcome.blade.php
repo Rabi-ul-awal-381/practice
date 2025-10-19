@@ -152,7 +152,7 @@
             <p class="text-yellow-800 mb-6">
                 Get access to exclusive Islamic lectures, Quran recitations, and premium content
             </p>
-            <a href="{{ route('payment.checkout') }}"
+            <a href="{{ route('payments.checkout') }}"
                class="bg-yellow-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-yellow-800 transition-all duration-300 shadow-lg inline-block">
                Upgrade Now
             </a>

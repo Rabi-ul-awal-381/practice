@@ -5,71 +5,93 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class PaymentController extends Controller
 {
-    public function showPage()
+    public function showPage(Request $request)
     {
+        $pendingUser = $request->session()->get('pending_user');
+    
+        if (!$pendingUser && !auth()->check()) {
+            return redirect()->route('register')->with('error', 'Please create an account first.');
+        }
+    
         return view('payments.checkout');
     }
+    
 
     public function createSession(Request $request)
-    {
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+{
+    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
 
-        $user = auth()->user();
+    $pendingUser = $request->session()->get('pending_user');
+    $email = auth()->check() ? auth()->user()->email : ($pendingUser['email'] ?? null);
 
-        $session = \Stripe\Checkout\Session::create([
-            'payment_method_types' => ['card'],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'usd',
-                    'product_data' => [
-                        'name' => 'Premium Membership',
-                    ],
-                    'unit_amount' => 500, // $5.00
-                ],
-                'quantity' => 1,
-            ]],
-            'mode' => 'payment',
-          'success_url' => url('/payment-success') . '?user=' . $user->id . '&session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('payment.cancel'),
-            'customer_email' => $user->email,
-        ]);
-
-        return redirect($session->url);
+    if (!$email) {
+        return redirect()->route('register')->with('error', 'User email not found.');
     }
 
-    public function success(Request $request)
+    $session = \Stripe\Checkout\Session::create([
+        'payment_method_types' => ['card'],
+        'line_items' => [[
+            'price_data' => [
+                'currency' => 'usd',
+                'product_data' => ['name' => 'Premium Membership'],
+                'unit_amount' => 500, // $5.00
+            ],
+            'quantity' => 1,
+        ]],
+        'mode' => 'payment',
+        'success_url' => url('/payment-success') . '?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => route('payments.cancel'),
+        'customer_email' => $email,
+    ]);
+
+    return redirect($session->url);
+}
+
+
+public function success(Request $request)
 {
-    $userId = $request->query('user');
     $sessionId = $request->query('session_id');
 
-    if (!$userId) {
-        return redirect('/')->with('error', 'User not found after payment.');
-    }
-
-    $user = User::find($userId);
-
-    if (!$user) {
-        return redirect('/')->with('error', 'User not found.');
-    }
-
-    // ✅ Optional: verify payment via Stripe API (to be extra safe)
     \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
     $session = \Stripe\Checkout\Session::retrieve($sessionId);
 
     if ($session && $session->payment_status === 'paid') {
-        $user->membership = 'premium';
-        $user->save();
+        // If user was logged in, upgrade them
+        if (auth()->check()) {
+            $user = auth()->user();
+            $user->membership_type = 'paid';
+            $user->save();
+            return redirect()->route('dashboard')->with('success', 'Your membership has been upgraded!');
+        }
+
+        // Otherwise create the new user from session
+        $pendingUser = session()->pull('pending_user');
+
+        if ($pendingUser) {
+            $user = \App\Models\User::create([
+                'name' => $pendingUser['name'],
+                'email' => $pendingUser['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($pendingUser['password']),
+                'membership_type' => 'paid',
+                'role' => 'user',
+            ]);
+
+            \Illuminate\Support\Facades\Auth::login($user);
+            return redirect()->route('dashboard')->with('success', 'Welcome! Premium account created successfully.');
+        }
     }
 
-    return view('payments.success', ['session_id' => $sessionId]);
+    return redirect()->route('register')->with('error', 'Payment not successful.');
 }
 
 
     public function cancel()
     {
-        return view('payments.cancel');
+        return redirect()->route('register')->with('error', 'Payment was cancelled.');
     }
 }
