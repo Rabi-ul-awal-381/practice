@@ -6,24 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('membership_type')->default('free');
+            // Change the column type to plain string to allow any value like 'pending'
+            $table->string('membership_type')->default('free')->change();
         });
     }
-    
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            // Optional rollback (if you had enum before)
+            $table->enum('membership_type', ['free', 'paid', 'premium'])->default('free')->change();
         });
     }
 };

@@ -25,30 +25,36 @@ class AuthController extends Controller
         'membership_type' => ['required', 'in:free,paid'],
     ]);
 
+    // Case 1: Free user
     if ($validated['membership_type'] === 'free') {
-        // Create user right away for free plan
-        $user = \App\Models\User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'password' => Hash::make($validated['password']),
             'membership_type' => 'free',
             'role' => 'user',
         ]);
 
-        \Illuminate\Support\Facades\Auth::login($user);
+        Auth::login($user);
         return redirect()->route('dashboard')->with('success', 'Account created successfully!');
     }
 
-    // For paid membership → go to checkout
-    $request->session()->put('pending_user', [
+    // Case 2: Paid user — create with pending status
+    $user = User::create([
         'name' => $validated['name'],
         'email' => $validated['email'],
-        'password' => $validated['password'], // store plain temporarily
-        'membership_type' => 'paid',
+        'password' => Hash::make($validated['password']),
+        'membership_type' => 'pending', // mark as pending until payment succeeds
+        'role' => 'user',
     ]);
 
+    // Store user ID for payment success
+    $request->session()->put('pending_user_id', $user->id);
+
+    // Redirect to checkout
     return redirect()->route('payments.checkout');
 }
+
 
 
     public function showLogin()

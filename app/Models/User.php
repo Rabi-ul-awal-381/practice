@@ -14,7 +14,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'membership_type',
+        'membership_type', // main column in database
     ];
 
     protected $hidden = [
@@ -30,6 +30,27 @@ class User extends Authenticatable
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Virtual attribute: membership
+    | Makes "membership" behave exactly like "membership_type"
+    |--------------------------------------------------------------------------
+    */
+    public function getMembershipAttribute()
+    {
+        return $this->attributes['membership_type'] ?? 'free';
+    }
+
+    public function setMembershipAttribute($value)
+    {
+        $this->attributes['membership_type'] = $value;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Role & Membership Helpers
+    |--------------------------------------------------------------------------
+    */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -37,7 +58,8 @@ class User extends Authenticatable
 
     public function isPaidMember(): bool
     {
-        return $this->membership_type === 'paid' || $this->membership_type === 'premium';
+        $type = $this->membership_type ?? $this->membership;
+        return in_array($type, ['paid', 'premium']);
     }
 
     public function videoViews()

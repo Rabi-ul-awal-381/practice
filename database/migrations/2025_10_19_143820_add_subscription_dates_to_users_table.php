@@ -12,18 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('membership_type')->default('free');
+            $table->date('membership_start')->nullable();
+            $table->date('membership_end')->nullable();
         });
     }
     
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn(['membership_start', 'membership_end']);
         });
     }
+    
 };

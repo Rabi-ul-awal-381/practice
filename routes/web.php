@@ -39,17 +39,20 @@ Route::get('/videos/{video}', [VideoController::class, 'show'])->name('videos.sh
 Route::middleware('auth')->group(function () {
     // User dashboard
     Route::get('/dashboard', function () {
+        // Refresh user data
         $user = \App\Models\User::find(auth()->id());
         auth()->setUser($user);
-
+    
         $videos = \App\Models\Video::with('category')
             ->when(!$user->isPaidMember(), fn($q) => $q->where('access_level', 'free'))
             ->latest()
             ->take(6)
             ->get();
-
-        return view('dashboard', compact('videos'));
+    
+        // 👇 Pass both $user and $videos
+        return view('dashboard', compact('user', 'videos'));
     })->name('dashboard');
+    
 
     // Video upload (only for logged-in users)
     Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');
