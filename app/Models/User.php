@@ -15,6 +15,8 @@ class User extends Authenticatable
         'password',
         'role',
         'membership_type', // main column in database
+        'membership_start',
+        'membership_end'
     ];
 
     protected $hidden = [

@@ -71,20 +71,25 @@
     </div>
 
     @if(Auth::check() && Auth::user()->membership_type === 'premium')
-    <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
-        <h3 class="font-bold text-lg">Premium Membership</h3>
+<div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
+    <h3 class="font-bold text-lg">Premium Membership</h3>
 
-        <p>
-            Membership Active From:
-            {{ optional(auth()->user()->membership_start)->format('F j, Y') ?? 'N/A' }}
-        </p>
+    <p>
+        Membership Active From:
+        {{ auth()->user()->membership_start 
+            ? \Carbon\Carbon::parse(auth()->user()->membership_start)->format('F j, Y') 
+            : 'N/A' }}
+    </p>
 
-        <p>
-            Expires On:
-            {{ optional(auth()->user()->membership_end)->format('F j, Y') ?? 'N/A' }}
-        </p>
-    </div>
+    <p>
+        Expires On:
+        {{ auth()->user()->membership_end 
+            ? \Carbon\Carbon::parse(auth()->user()->membership_end)->format('F j, Y') 
+            : 'N/A' }}
+    </p>
+</div>
 @endif
+
 
 
 

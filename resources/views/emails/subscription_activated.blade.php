@@ -10,16 +10,18 @@
 
         <p>Hi {{ $user->name }},</p>
 
-        <p>Thank you for subscribing to our Premium plan! Your membership is now active.</p>
+        <p>Thank you for subscribing to our <strong>Premium Plan</strong>! Your membership is now active.</p>
 
-        <ul>
-            <li><strong>Start Date:</strong> {{ \Carbon\Carbon::parse($user->membership_start)->format('F j, Y') }}</li>
-            <li><strong>End Date:</strong> {{ \Carbon\Carbon::parse($user->membership_end)->format('F j, Y') }}</li>
-        </ul>
+        <div style="background: #f0fdf4; padding: 15px 20px; border-left: 5px solid #16a34a; margin: 20px 0;">
+            <p><strong>Membership Start Date:</strong> {{ $startDate }}</p>
+            <p><strong>Membership End Date:</strong> {{ $endDate }}</p>
+        </div>
 
-        <p>You can now enjoy full access to all premium features and content.</p>
+        <p>You now have full access to all <strong>premium lectures, courses, and content</strong>.</p>
 
-        <p>— The Team</p>
+        <p>May Allah bless your learning journey 🌙</p>
+
+        <p style="margin-top: 30px;">— The Learn Islam Team</p>
     </div>
 </body>
 </html>
